@@ -40,3 +40,9 @@ docs/superpowers/
 /prime_han_ar_measure_best.pth.tar
 /han_ar_single_param.dat
 virtuoso/pyScoreParser/AlignmentTool_v190813/Programs/
+
+# pickled ScoreData caches (regenerated automatically on first use, and
+# pickle format isn't stable across code/platform changes) and demo outputs
+# from manual testing (plots/CSVs), not source
+test_pieces/*/score.dat
+test_result/

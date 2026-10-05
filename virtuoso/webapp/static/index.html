@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Intentio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Stack Sans Text", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    margin: 0; padding: 64px 24px;
+    color: #fff; background: #000;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  select, input[type=file] { background: #111; color: #fff; border-color: #333; }
+  .header { max-width: 740px; text-align: center; margin: 0 auto; }
+  h1 { font-size: 2rem; font-weight: 700; margin: 0 0 14px; color: #fff; letter-spacing: 0.01em; }
+  .sub { color: #999; margin-bottom: 0; font-size: 1rem; line-height: 1.6; }
+  .layout {
+    max-width: 1100px; width: 100%; margin: 40px auto 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+  .panel {
+    padding: 28px; background: #0a0a0a;
+    border: 1px solid #262626; border-radius: 12px;
+  }
+  label { display: block; font-weight: 600; margin: 20px 0 6px; font-size: 0.9rem; color: #fff; }
+  label:first-child { margin-top: 0; }
+  select, input[type=file] {
+    width: 100%; padding: 10px; font-size: 1rem; border-radius: 8px;
+    border: 1px solid #333; box-sizing: border-box;
+  }
+  button {
+    margin-top: 24px; width: 100%; padding: 12px; font-size: 1rem; font-weight: 600;
+    border: none; border-radius: 8px; background: #4a63e0; color: white; cursor: pointer;
+  }
+  button:disabled { background: #333; color: #777; cursor: default; }
+  .status { margin-top: 16px; font-size: 0.9rem; color: #999; }
+  .error { color: #ff6b5e; }
+  .right { display: flex; flex-direction: column; justify-content: center; min-height: 260px; }
+  .placeholder { color: #666; font-size: 0.9rem; text-align: center; }
+  .card-title { font-size: 0.9rem; color: #999; text-align: center; margin-bottom: 4px; }
+  .overall { font-size: 2.6rem; font-weight: 700; text-align: center; margin: 4px 0 20px; color: #fff; }
+  .bars { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+  .bar-label { width: 90px; flex-shrink: 0; color: #999; }
+  .bar-track { flex: 1; height: 8px; background: #1f1f1f; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #4a63e0; }
+  .bar-val { width: 36px; text-align: right; font-variant-numeric: tabular-nums; color: #fff; }
+  .feedback { margin: 0; padding-left: 20px; color: #ddd; }
+  .feedback li { margin-bottom: 6px; font-size: 0.85rem; line-height: 1.4; }
+  strong { color: #fff; }
+  .about {
+    max-width: 780px; width: 100%; margin: 88px auto 0;
+    border-top: 1px solid #222; padding-top: 48px;
+  }
+  .about h2 { font-size: 1.15rem; font-weight: 700; margin: 0 0 20px; color: #fff; }
+  .about p { color: #aaa; font-size: 0.95rem; line-height: 1.7; margin: 0 0 18px; }
+  .about .tagline { color: #fff; font-weight: 600; font-size: 0.95rem; margin: 24px 0 0; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Intentio.</h1>
+    <div class="sub">Hear the intention behind the score. Compare your performance to a VirtuosoNet-predicted composer-style interpretation and discover how your timing, dynamics, articulation, and phrasing align with the musical character of the piece.</div>
+  </div>
+
+  <div class="layout">
+    <div class="panel left">
+      <form id="form">
+        <label for="piece">Piece</label>
+        <select id="piece" required></select>
+
+        <label for="file">Your recording (audio or video)</label>
+        <input id="file" type="file" accept="audio/*,video/*" required>
+
+        <button id="submit" type="submit">Analyze</button>
+      </form>
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="panel right" id="resultPanel">
+      <div class="placeholder" id="placeholder">Results will appear here after you analyze a recording.</div>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <div class="about">
+    <h2>Preserving the intention behind the music</h2>
+    <p>Classical music is more than playing the notes written on a page. Every score carries the musical language of a composer—their approach to phrasing, dynamics, tempo, articulation, and expression—shaped by the historical and artistic world in which they composed.</p>
+    <p>Yet a score cannot capture everything about how music should sound. Much of classical interpretation lives between the notes, passed down through performance traditions, recordings, scholarship, and teaching.</p>
+    <p>We explore how AI can help preserve and make this interpretive knowledge more accessible. Rather than defining one &ldquo;correct&rdquo; performance, we give musicians a reference point for understanding the composer's stylistic world, seeing where their own interpretation differs, and making those artistic choices more intentionally.</p>
+    <p class="tagline">Preserve the tradition. Understand the intention. Find your interpretation.</p>
+  </div>
+
+<script>
+const piecesSelect = document.getElementById('piece');
+const form = document.getElementById('form');
+const submitBtn = document.getElementById('submit');
+const statusEl = document.getElementById('status');
+const resultEl = document.getElementById('result');
+const placeholderEl = document.getElementById('placeholder');
+
+async function loadPieces() {
+  const res = await fetch('/api/pieces');
+  const pieces = await res.json();
+  piecesSelect.innerHTML = pieces.map(p => `<option value="${p.id}">${p.composer} — ${p.title}</option>`).join('');
+}
+loadPieces();
+
+function bar(label, value) {
+  const v = value === null || value === undefined ? 0 : Math.round(value);
+  return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${v}%"></div></div>
+    <div class="bar-val">${v}</div>
+  </div>`;
+}
+
+function renderResult(r) {
+  placeholderEl.style.display = 'none';
+  resultEl.innerHTML = `
+    <div class="card-title">${r.composer} — ${r.piece}</div>
+    <div class="overall">${Math.round(r.overall_score)}%</div>
+    <div class="bars">
+      ${bar('Tempo', r.tempo_score)}
+      ${bar('Dynamics', r.dynamics_score)}
+      ${bar('Articulation', r.articulation_score)}
+    </div>
+    <div>
+      <strong style="font-size:0.9rem">Feedback</strong>
+      <ul class="feedback">${r.feedback.map(f => `<li>${f}</li>`).join('') || '<li>No major deviations found.</li>'}</ul>
+    </div>`;
+}
+
+async function poll(jobId) {
+  const res = await fetch(`/api/jobs/${jobId}`);
+  const job = await res.json();
+  if (job.status === 'processing') {
+    statusEl.textContent = 'Analyzing... this can take a minute or two.';
+    setTimeout(() => poll(jobId), 3000);
+  } else if (job.status === 'done') {
+    statusEl.textContent = '';
+    renderResult(job.result);
+    submitBtn.disabled = false;
+  } else {
+    statusEl.innerHTML = `<span class="error">Error: ${job.error}</span>`;
+    submitBtn.disabled = false;
+  }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  submitBtn.disabled = true;
+  placeholderEl.style.display = 'block';
+  resultEl.innerHTML = '';
+  statusEl.textContent = 'Uploading...';
+
+  const fd = new FormData();
+  fd.append('piece_id', piecesSelect.value);
+  fd.append('file', document.getElementById('file').files[0]);
+
+  const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+  if (!res.ok) {
+    statusEl.innerHTML = `<span class="error">Upload failed: ${await res.text()}</span>`;
+    submitBtn.disabled = false;
+    return;
+  }
+  const { job_id } = await res.json();
+  statusEl.textContent = 'Analyzing... this can take a minute or two.';
+  poll(job_id);
+});
+</script>
+</body>
+</html>
