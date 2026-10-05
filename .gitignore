@@ -29,6 +29,8 @@ test_pieces/*
 !test_pieces/bps_17_1/**
 !test_pieces/chopin_noct_48_1/
 !test_pieces/chopin_noct_48_1/**
+!test_pieces/debussy_clair_de_lune/
+!test_pieces/debussy_clair_de_lune/**
 Schumann/
 rencon/*.mid
 rencon/*.png
