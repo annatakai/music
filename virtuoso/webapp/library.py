@@ -49,6 +49,27 @@ LIBRARY = [
         xml_path=REPO_ROOT / "test_pieces/debussy_clair_de_lune/score.musicxml",
         score_midi_path=REPO_ROOT / "test_pieces/debussy_clair_de_lune/score.mid",
     ),
+    LibraryPiece(
+        id="chopin_fantaisie_impromptu",
+        title="Fantaisie-Impromptu, Op. 66",
+        composer="Chopin",
+        xml_path=REPO_ROOT / "test_pieces/chopin_fantaisie_impromptu/score.musicxml",
+        score_midi_path=REPO_ROOT / "test_pieces/chopin_fantaisie_impromptu/score.mid",
+    ),
+    LibraryPiece(
+        id="beethoven_moonlight_mvt3",
+        title='Piano Sonata No. 14 "Moonlight", Mvt. III (Presto agitato)',
+        composer="Beethoven",
+        xml_path=REPO_ROOT / "test_pieces/beethoven_moonlight_mvt3/score.musicxml",
+        score_midi_path=REPO_ROOT / "test_pieces/beethoven_moonlight_mvt3/score.mid",
+    ),
+    LibraryPiece(
+        id="mozart_k331_mvt1",
+        title="Piano Sonata No. 11, K. 331, Mvt. I (Andante grazioso)",
+        composer="Mozart",
+        xml_path=REPO_ROOT / "test_pieces/mozart_k331_mvt1/score.musicxml",
+        score_midi_path=REPO_ROOT / "test_pieces/mozart_k331_mvt1/score.mid",
+    ),
 ]
 
 LIBRARY_BY_ID = {p.id: p for p in LIBRARY}

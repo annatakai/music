@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from .library import LIBRARY, LIBRARY_BY_ID
 from ..audio_perf_score import score_audio_performance, load_model
+from ..audio_score_align import identify_best_match
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CHECKPOINT_PATH = REPO_ROOT / "pretrained_weights/han_measnote_gru/checkpoint_best.pt"
@@ -60,10 +61,40 @@ def _extract_audio_if_video(path: Path) -> Path:
     return audio_path
 
 
+def _check_piece_match(piece_id: str, audio_path: Path):
+    """Verify the selected piece is actually the best-matching piece in the
+    library for this recording before doing any expensive scoring. DTW
+    always finds *some* alignment for any two sequences, even unrelated
+    ones -- a single piece's alignment cost in isolation doesn't tell you
+    whether it's the right piece, only ranking it against alternatives does.
+    Returns None if it checks out, or an error dict if it doesn't.
+    """
+    candidates = {p.id: str(p.score_midi_path) for p in LIBRARY}
+    ranked = identify_best_match(str(audio_path), candidates)
+    best_id, best_cost = ranked[0]
+    selected_cost = dict(ranked)[piece_id]
+
+    if best_id != piece_id:
+        return {
+            "selected_piece": LIBRARY_BY_ID[piece_id].title,
+            "selected_cost": selected_cost,
+            "suggested_piece": LIBRARY_BY_ID[best_id].title,
+            "suggested_piece_id": best_id,
+            "suggested_cost": best_cost,
+        }
+    return None
+
+
 def _run_job(job_id: str, piece_id: str, upload_path: Path):
     try:
         piece = LIBRARY_BY_ID[piece_id]
         audio_path = _extract_audio_if_video(upload_path)
+
+        mismatch = _check_piece_match(piece_id, audio_path)
+        if mismatch is not None:
+            _jobs[job_id] = {"status": "mismatch", "mismatch": mismatch}
+            return
+
         result = score_audio_performance(
             xml_path=str(piece.xml_path),
             score_midi_path=str(piece.score_midi_path),

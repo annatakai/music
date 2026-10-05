@@ -31,6 +31,12 @@ test_pieces/*
 !test_pieces/chopin_noct_48_1/**
 !test_pieces/debussy_clair_de_lune/
 !test_pieces/debussy_clair_de_lune/**
+!test_pieces/chopin_fantaisie_impromptu/
+!test_pieces/chopin_fantaisie_impromptu/**
+!test_pieces/beethoven_moonlight_mvt3/
+!test_pieces/beethoven_moonlight_mvt3/**
+!test_pieces/mozart_k331_mvt1/
+!test_pieces/mozart_k331_mvt1/**
 Schumann/
 rencon/*.mid
 rencon/*.png

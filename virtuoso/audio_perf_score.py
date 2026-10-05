@@ -178,12 +178,16 @@ def generate_feedback(measure, tempo_diff_z, dyn_diff_z, artic_measure=None, art
                 "measure": int(m), "feature": "articulation",
                 "mean_z": float(np.mean(artic_diff_z[mask])),
             })
-    reports.sort(key=lambda r: -abs(r["mean_z"]))
+    # pick the most significant deviations first (by severity), then present
+    # that selected set in measure order (low to high) so feedback reads like
+    # a walkthrough of the piece rather than a ranked list
+    significant = [r for r in reports if abs(r["mean_z"]) >= min_severity]
+    significant.sort(key=lambda r: -abs(r["mean_z"]))
+    selected = significant[:top_n]
+    selected.sort(key=lambda r: (r["measure"], r["feature"]))
 
     lines = []
-    for r in reports:
-        if abs(r["mean_z"]) < min_severity:
-            break
+    for r in selected:
         if r["feature"] == "tempo":
             phrase = "rushing ahead of" if r["mean_z"] > 0 else "lagging behind"
             detail = "the reference interpretation's pacing shape"
@@ -193,7 +197,5 @@ def generate_feedback(measure, tempo_diff_z, dyn_diff_z, artic_measure=None, art
         else:
             phrase = "more legato/sustained than" if r["mean_z"] > 0 else "more detached/staccato than"
             detail = "the reference interpretation's articulation"
-        lines.append(f"Measure {r['measure']}: {phrase} {detail} (|z|={abs(r['mean_z']):.1f})")
-        if len(lines) >= top_n:
-            break
+        lines.append(f"Measure {r['measure']}: {phrase} {detail}")
     return lines

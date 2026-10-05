@@ -32,13 +32,7 @@ def compute_chroma(y, sr=SR, hop_length=HOP_LENGTH):
     return chroma + 1e-6
 
 
-def align(score_midi_path, performance_audio_path, sr=SR, hop_length=HOP_LENGTH):
-    score_audio = synthesize_score_audio(score_midi_path, sr=sr)
-    perf_audio = load_performance_audio(performance_audio_path, sr=sr)
-
-    score_chroma = compute_chroma(score_audio, sr=sr, hop_length=hop_length)
-    perf_chroma = compute_chroma(perf_audio, sr=sr, hop_length=hop_length)
-
+def align_chroma(score_chroma, perf_chroma, score_duration, perf_duration, sr=SR, hop_length=HOP_LENGTH):
     # D[i, j] = cumulative cost; wp = warping path (frame index pairs),
     # ordered from the end of the piece back to the start
     D, wp = librosa.sequence.dtw(X=score_chroma, Y=perf_chroma, metric="cosine")
@@ -50,10 +44,47 @@ def align(score_midi_path, performance_audio_path, sr=SR, hop_length=HOP_LENGTH)
     return {
         "score_times": score_times,
         "perf_times": perf_times,
-        "score_duration": len(score_audio) / sr,
-        "perf_duration": len(perf_audio) / sr,
+        "score_duration": score_duration,
+        "perf_duration": perf_duration,
         "cost": float(D[-1, -1] / len(wp)),
     }
+
+
+def align(score_midi_path, performance_audio_path, sr=SR, hop_length=HOP_LENGTH):
+    score_audio = synthesize_score_audio(score_midi_path, sr=sr)
+    perf_audio = load_performance_audio(performance_audio_path, sr=sr)
+    score_chroma = compute_chroma(score_audio, sr=sr, hop_length=hop_length)
+    perf_chroma = compute_chroma(perf_audio, sr=sr, hop_length=hop_length)
+    return align_chroma(score_chroma, perf_chroma, len(score_audio) / sr, len(perf_audio) / sr,
+                         sr=sr, hop_length=hop_length)
+
+
+def identify_best_match(performance_audio_path, candidates, sr=SR, hop_length=HOP_LENGTH):
+    """Rank candidate scores by how well they chroma+DTW-align to a real
+    recording. DTW always finds *some* path through any cost matrix, even
+    for a completely unrelated piece -- it never "fails" -- so a single
+    piece's alignment cost in isolation doesn't reliably tell you whether
+    it's actually the right piece. Comparing cost *across* candidates for
+    the same recording is the much more robust signal: the correct piece
+    should consistently come out lowest.
+
+    `candidates`: dict of candidate_id -> score_midi_path.
+    Returns a list of (candidate_id, cost) sorted best (lowest cost) first.
+    """
+    perf_audio = load_performance_audio(performance_audio_path, sr=sr)
+    perf_chroma = compute_chroma(perf_audio, sr=sr, hop_length=hop_length)
+    perf_duration = len(perf_audio) / sr
+
+    results = []
+    for cand_id, score_midi_path in candidates.items():
+        score_audio = synthesize_score_audio(score_midi_path, sr=sr)
+        score_chroma = compute_chroma(score_audio, sr=sr, hop_length=hop_length)
+        alignment = align_chroma(score_chroma, perf_chroma, len(score_audio) / sr, perf_duration,
+                                  sr=sr, hop_length=hop_length)
+        results.append((cand_id, alignment["cost"]))
+
+    results.sort(key=lambda r: r[1])
+    return results
 
 
 def score_time_to_perf_time(alignment, score_time):

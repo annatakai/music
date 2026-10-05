@@ -21,41 +21,75 @@
   h1 { font-size: 2rem; font-weight: 700; margin: 0 0 14px; color: #fff; letter-spacing: 0.01em; }
   .sub { color: #999; margin-bottom: 0; font-size: 1rem; line-height: 1.6; }
   .layout {
-    max-width: 1100px; width: 100%; margin: 40px auto 0;
+    max-width: 1240px; width: 100%; margin: 40px auto 0;
     display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
   }
   @media (max-width: 720px) {
     .layout { grid-template-columns: 1fr; }
   }
   .panel {
-    padding: 28px; background: #0a0a0a;
-    border: 1px solid #262626; border-radius: 12px;
+    padding: 36px; background: #0a0a0a;
+    border: 1px solid #262626; border-radius: 14px;
   }
-  label { display: block; font-weight: 600; margin: 20px 0 6px; font-size: 0.9rem; color: #fff; }
+  label { display: block; font-weight: 600; margin: 24px 0 8px; font-size: 1.05rem; color: #fff; }
   label:first-child { margin-top: 0; }
   select, input[type=file] {
-    width: 100%; padding: 10px; font-size: 1rem; border-radius: 8px;
+    width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 8px;
     border: 1px solid #333; box-sizing: border-box;
   }
   button {
-    margin-top: 24px; width: 100%; padding: 12px; font-size: 1rem; font-weight: 600;
+    margin-top: 28px; width: 100%; padding: 14px; font-size: 1.1rem; font-weight: 600;
     border: none; border-radius: 8px; background: #4a63e0; color: white; cursor: pointer;
   }
   button:disabled { background: #333; color: #777; cursor: default; }
-  .status { margin-top: 16px; font-size: 0.9rem; color: #999; }
+  #submit {
+    margin-top: 28px; width: 100%; padding: 0; border: 1px solid #333; border-radius: 10px;
+    cursor: pointer; background: #0a0a0a; position: relative;
+  }
+  #submit:disabled { cursor: default; }
+  #submit::after {
+    content: "Click here to analyze";
+    position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%) translateY(4px);
+    padding: 6px 12px; border-radius: 6px; background: #1a1a1a; border: 1px solid #333;
+    color: #fff; font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity 0.15s, transform 0.15s;
+  }
+  #submit:hover:not(:disabled)::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .piano-keys {
+    display: flex; height: 68px; position: relative; background: #0a0a0a;
+    border-radius: 9px; overflow: hidden;
+  }
+  .white-key { flex: 1; background: #f0f0f0; border-right: 1px solid #000; transition: background 0.1s; }
+  .white-key:last-child { border-right: none; }
+  .black-key {
+    position: absolute; top: 0; width: 4.2%; height: 62%;
+    background: #000; border: 1px solid #000; border-radius: 0 0 2px 2px;
+    transform: translateX(-50%);
+  }
+  #submit:hover:not(:disabled) .white-key { background: #d5d5d5; }
+  #submit:hover:not(:disabled) .black-key { background: #3a3a3a; border-color: #3a3a3a; }
+  #submit:disabled .white-key { background: #444; }
+  #submit:disabled .black-key { background: #222; border-color: #222; }
+  .status { margin-top: 18px; font-size: 1rem; color: #999; }
   .error { color: #ff6b5e; }
-  .right { display: flex; flex-direction: column; justify-content: center; min-height: 260px; }
-  .placeholder { color: #666; font-size: 0.9rem; text-align: center; }
-  .card-title { font-size: 0.9rem; color: #999; text-align: center; margin-bottom: 4px; }
-  .overall { font-size: 2.6rem; font-weight: 700; text-align: center; margin: 4px 0 20px; color: #fff; }
-  .bars { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
-  .bar-label { width: 90px; flex-shrink: 0; color: #999; }
-  .bar-track { flex: 1; height: 8px; background: #1f1f1f; border-radius: 4px; overflow: hidden; }
+  .right { display: flex; flex-direction: column; justify-content: center; min-height: 300px; }
+  .placeholder { color: #666; font-size: 1.05rem; text-align: center; }
+  .card-title { font-size: 1.05rem; color: #999; text-align: center; margin-bottom: 6px; }
+  .overall { font-size: 3rem; font-weight: 700; text-align: center; margin: 6px 0 24px; color: #fff; }
+  .bars { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; font-size: 1rem; }
+  .bar-label { width: 110px; flex-shrink: 0; color: #999; }
+  .bar-track { flex: 1; height: 10px; background: #1f1f1f; border-radius: 5px; overflow: hidden; }
   .bar-fill { height: 100%; background: #4a63e0; }
-  .bar-val { width: 36px; text-align: right; font-variant-numeric: tabular-nums; color: #fff; }
-  .feedback { margin: 0; padding-left: 20px; color: #ddd; }
-  .feedback li { margin-bottom: 6px; font-size: 0.85rem; line-height: 1.4; }
+  .bar-val { width: 40px; text-align: right; font-variant-numeric: tabular-nums; color: #fff; }
+  .feedback-toggle {
+    margin-top: 4px; width: 100%; padding: 12px; font-size: 1rem; font-weight: 600;
+    border: 1px solid #333; border-radius: 8px; background: transparent; color: #fff; cursor: pointer;
+  }
+  .feedback-toggle:hover { background: #151515; }
+  .feedback { margin: 16px 0 0; padding-left: 22px; color: #ddd; display: none; }
+  .feedback.open { display: block; }
+  .feedback li { margin-bottom: 8px; font-size: 0.95rem; line-height: 1.5; }
   strong { color: #fff; }
   .about {
     max-width: 780px; width: 100%; margin: 88px auto 0;
@@ -81,7 +115,25 @@
         <label for="file">Your recording (audio or video)</label>
         <input id="file" type="file" accept="audio/*,video/*" required>
 
-        <button id="submit" type="submit">Analyze</button>
+        <button id="submit" type="submit" aria-label="Analyze">
+          <div class="piano-keys">
+            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
+            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
+            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
+            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
+            <div class="white-key"></div><div class="white-key"></div>
+            <div class="black-key" style="left:7.142857%"></div>
+            <div class="black-key" style="left:14.285714%"></div>
+            <div class="black-key" style="left:28.571429%"></div>
+            <div class="black-key" style="left:35.714286%"></div>
+            <div class="black-key" style="left:42.857143%"></div>
+            <div class="black-key" style="left:57.142857%"></div>
+            <div class="black-key" style="left:64.285714%"></div>
+            <div class="black-key" style="left:78.571429%"></div>
+            <div class="black-key" style="left:85.714286%"></div>
+            <div class="black-key" style="left:92.857143%"></div>
+          </div>
+        </button>
       </form>
       <div id="status" class="status"></div>
     </div>
@@ -134,10 +186,26 @@ function renderResult(r) {
       ${bar('Dynamics', r.dynamics_score)}
       ${bar('Articulation', r.articulation_score)}
     </div>
-    <div>
-      <strong style="font-size:0.9rem">Feedback</strong>
-      <ul class="feedback">${r.feedback.map(f => `<li>${f}</li>`).join('') || '<li>No major deviations found.</li>'}</ul>
-    </div>`;
+    <button type="button" class="feedback-toggle" id="feedbackToggle">Feedback</button>
+    <ul class="feedback" id="feedbackList">${r.feedback.map(f => `<li>${f}</li>`).join('') || '<li>No major deviations found.</li>'}</ul>`;
+
+  const toggle = document.getElementById('feedbackToggle');
+  const list = document.getElementById('feedbackList');
+  toggle.addEventListener('click', () => {
+    const open = list.classList.toggle('open');
+    toggle.textContent = open ? 'Hide feedback' : 'Feedback';
+  });
+}
+
+function renderMismatch(m) {
+  placeholderEl.style.display = 'none';
+  resultEl.innerHTML = `
+    <div class="card-title" style="color:#ff6b5e">Doesn't look like a match</div>
+    <p style="font-size:0.9rem;color:#ccc;line-height:1.6;text-align:center;margin-top:12px">
+      Your recording matches <strong>${m.suggested_piece}</strong> much more closely
+      than the piece you selected (<strong>${m.selected_piece}</strong>).
+      Did you mean to pick that instead?
+    </p>`;
 }
 
 async function poll(jobId) {
@@ -149,6 +217,10 @@ async function poll(jobId) {
   } else if (job.status === 'done') {
     statusEl.textContent = '';
     renderResult(job.result);
+    submitBtn.disabled = false;
+  } else if (job.status === 'mismatch') {
+    statusEl.textContent = '';
+    renderMismatch(job.mismatch);
     submitBtn.disabled = false;
   } else {
     statusEl.innerHTML = `<span class="error">Error: ${job.error}</span>`;
