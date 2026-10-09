@@ -1,2 +1,8 @@
-Flask
-gunicorn
+fastapi
+uvicorn
+python-multipart
+numpy
+scipy
+librosa
+soundfile
+torch
