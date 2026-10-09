@@ -2,251 +2,567 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Intentio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='18' fill='%23183d39'/%3E%3Ccircle cx='14' cy='24' r='3.3' fill='%23f1eee5'/%3E%3Ccircle cx='24' cy='22' r='3.3' fill='%23f1eee5'/%3E%3Cpath d='M17.3 24V11l9.4-2v11' stroke='%23f1eee5' stroke-width='1.8' fill='none'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
-  :root { color-scheme: dark; }
+  :root { color-scheme: light; }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    font-family: "Stack Sans Text", -apple-system, "Helvetica Neue", Arial, sans-serif;
-    margin: 0; padding: 64px 24px;
-    color: #fff; background: #000;
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center;
+    margin: 0; position: relative; overflow-x: hidden;
+    min-height: 100dvh; background: #f1eee5; color: #183d39;
+    font-family: 'DM Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif;
   }
-  select, input[type=file] { background: #111; color: #fff; border-color: #333; }
-  .header { max-width: 740px; text-align: center; margin: 0 auto; }
-  h1 { font-size: 2rem; font-weight: 700; margin: 0 0 14px; color: #fff; letter-spacing: 0.01em; }
-  .sub { color: #999; margin-bottom: 0; font-size: 1rem; line-height: 1.6; }
-  .layout {
-    max-width: 1240px; width: 100%; margin: 40px auto 0;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  ::selection { background: #d98b6b; color: #f8f4e9; }
+  .serif { font-family: 'Instrument Serif', Georgia, serif; }
+  .mono { font-family: 'DM Mono', monospace; }
+  a { color: inherit; text-decoration: none; }
+
+  .grain {
+    pointer-events: none; position: fixed; inset: 0; z-index: 20; opacity: .12;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E");
   }
-  @media (max-width: 720px) {
-    .layout { grid-template-columns: 1fr; }
+  .blob {
+    pointer-events: none; position: absolute; left: -120px; top: 340px;
+    height: 380px; width: 380px; border-radius: 999px; background: #e2dfd2;
+    opacity: .6; filter: blur(64px);
   }
-  .panel {
-    padding: 36px; background: #0a0a0a;
-    border: 1px solid #262626; border-radius: 14px;
+
+  header.site {
+    position: relative; max-width: 1192px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 24px;
   }
-  label { display: block; font-weight: 600; margin: 24px 0 8px; font-size: 1.05rem; color: #fff; }
-  label:first-child { margin-top: 0; }
-  select, input[type=file] {
-    width: 100%; padding: 12px; font-size: 1.1rem; border-radius: 8px;
-    border: 1px solid #333; box-sizing: border-box;
+  @media (min-width: 640px) { header.site { padding: 24px 40px; } }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    display: grid; place-items: center; height: 36px; width: 36px; border-radius: 999px;
+    background: #183d39; color: #f1eee5; flex-shrink: 0;
   }
-  button {
-    margin-top: 28px; width: 100%; padding: 14px; font-size: 1.1rem; font-weight: 600;
-    border: none; border-radius: 8px; background: #4a63e0; color: white; cursor: pointer;
+  .brand-name { font-size: 25px; letter-spacing: -.04em; }
+  .brand-name .dot { color: #c97756; }
+  .status-pill { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .16em; color: #687975; }
+  .status-dot { height: 7px; width: 7px; border-radius: 999px; background: #c0a06f; }
+  .status-dot.ready { background: #639778; }
+
+  .rise { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+  .rise-delay { animation: rise .7s .13s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
   }
-  button:disabled { background: #333; color: #777; cursor: default; }
-  #submit {
-    margin-top: 28px; width: 100%; padding: 0; border: 1px solid #333; border-radius: 10px;
-    cursor: pointer; background: #0a0a0a; position: relative;
+
+  .hero-wrap { position: relative; max-width: 1192px; margin: 0 auto; padding: 32px 24px 64px; }
+  @media (min-width: 640px) { .hero-wrap { padding: 56px 40px 64px; } }
+  .hero { max-width: 800px; margin: 0 auto; text-align: center; }
+  .eyebrow { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: .24em; color: #8b9386; margin-bottom: 20px; }
+  .eyebrow .line { height: 1px; width: 32px; background: #c7c9bb; }
+  h1.hero-title { font-size: 52px; line-height: .98; letter-spacing: -.045em; margin: 0; color: #173c38; font-weight: 400; }
+  h1.hero-title em { font-style: italic; font-weight: 400; color: #c97756; }
+  @media (min-width: 640px) { h1.hero-title { font-size: 76px; } }
+  .hero-sub { max-width: 650px; margin: 24px auto 0; font-size: 15px; line-height: 1.8; color: #62726d; }
+  @media (min-width: 640px) { .hero-sub { font-size: 16px; } }
+
+  .grid-cards { max-width: 1060px; margin: 48px auto 0; display: grid; gap: 20px; }
+  @media (min-width: 768px) { .grid-cards { grid-template-columns: .94fr 1.06fr; gap: 24px; } }
+
+  .card { border-radius: 18px; border: 1px solid #d6d4c8; padding: 24px; }
+  @media (min-width: 640px) { .card { padding: 36px; } }
+  .card-left { background: #f8f6f0; box-shadow: 0 16px 52px rgba(42,53,45,.055); }
+  .card-right { background: #e9e9dd; min-height: 380px; display: flex; flex-direction: column; }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+  .card-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .18em; color: #a06d57; margin: 0; }
+  .card-title { margin: 8px 0 0; font-size: 31px; line-height: 1.15; letter-spacing: -.025em; }
+  .card-icon { display: grid; place-items: center; height: 40px; width: 40px; border-radius: 999px; border: 1px solid #ddd9cc; color: #52736b; flex-shrink: 0; }
+
+  label.field-label { display: block; margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: #4e625c; }
+  label.field-label .hint { font-weight: 400; color: #849088; }
+  .select-wrap { position: relative; }
+  select#piece {
+    appearance: none; -webkit-appearance: none; width: 100%; height: 52px; border-radius: 9px;
+    border: 1px solid #d8d5c9; background: #f4f1e9; padding: 0 40px 0 16px; font-size: 14px;
+    color: #203e39; font-family: inherit; outline: none; transition: border-color .15s, box-shadow .15s;
   }
-  #submit:disabled { cursor: default; }
-  #submit::after {
-    content: "Click here to analyze";
-    position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%) translateY(4px);
-    padding: 6px 12px; border-radius: 6px; background: #1a1a1a; border: 1px solid #333;
-    color: #fff; font-size: 0.85rem; font-weight: 500; white-space: nowrap;
-    opacity: 0; pointer-events: none; transition: opacity 0.15s, transform 0.15s;
+  select#piece:focus { border-color: #62857b; box-shadow: 0 0 0 3px rgba(98,133,123,.15); }
+  .select-wrap svg.arrow { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #77857c; }
+
+  .dropzone {
+    margin-top: 28px; display: flex; align-items: center; gap: 16px; width: 100%; min-height: 92px;
+    border-radius: 10px; border: 1.5px dashed #bfc8b9; background: #f3f2e9; padding: 0 16px;
+    text-align: left; cursor: pointer; transition: border-color .15s, background .15s; font-family: inherit;
   }
-  #submit:hover:not(:disabled)::after { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .piano-keys {
-    display: flex; height: 68px; position: relative; background: #0a0a0a;
-    border-radius: 9px; overflow: hidden;
+  .dropzone:hover { border-color: #688b7e; background: #eeefe5; }
+  .dropzone:disabled { opacity: .6; cursor: default; }
+  .dz-icon { display: grid; place-items: center; height: 44px; width: 44px; flex-shrink: 0; border-radius: 999px; background: #e3e9dc; color: #537369; }
+  .dz-text { min-width: 0; flex: 1; }
+  .dz-name { display: block; font-size: 13px; font-weight: 600; color: #284640; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dz-sub { display: block; margin-top: 2px; font-size: 11px; color: #879189; }
+  .dz-action { font-size: 11px; font-weight: 600; color: #647970; flex-shrink: 0; }
+  .dropzone:hover .dz-action { color: #254b42; }
+
+  button#submit {
+    margin-top: 20px; width: 100%; padding: 7px; border-radius: 10px; border: 1px solid #d2d1c5;
+    background: #f8f6f0; cursor: pointer; font-family: inherit;
   }
-  .white-key { flex: 1; background: #f0f0f0; border-right: 1px solid #000; transition: background 0.1s; }
-  .white-key:last-child { border-right: none; }
-  .black-key {
-    position: absolute; top: 0; width: 4.2%; height: 62%;
-    background: #000; border: 1px solid #000; border-radius: 0 0 2px 2px;
-    transform: translateX(-50%);
-  }
-  #submit:hover:not(:disabled) .white-key { background: #d5d5d5; }
-  #submit:hover:not(:disabled) .black-key { background: #3a3a3a; border-color: #3a3a3a; }
-  #submit:disabled .white-key { background: #444; }
-  #submit:disabled .black-key { background: #222; border-color: #222; }
-  .status { margin-top: 18px; font-size: 1rem; color: #999; }
-  .error { color: #ff6b5e; }
-  .right { display: flex; flex-direction: column; justify-content: center; min-height: 300px; }
-  .placeholder { color: #666; font-size: 1.05rem; text-align: center; }
-  .card-title { font-size: 1.05rem; color: #999; text-align: center; margin-bottom: 6px; }
-  .overall { font-size: 3rem; font-weight: 700; text-align: center; margin: 6px 0 24px; color: #fff; }
-  .bars { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
-  .bar-row { display: flex; align-items: center; gap: 12px; font-size: 1rem; }
-  .bar-label { width: 110px; flex-shrink: 0; color: #999; }
-  .bar-track { flex: 1; height: 10px; background: #1f1f1f; border-radius: 5px; overflow: hidden; }
-  .bar-fill { height: 100%; background: #4a63e0; }
-  .bar-val { width: 40px; text-align: right; font-variant-numeric: tabular-nums; color: #fff; }
+  button#submit:disabled { cursor: not-allowed; }
+  .piano-keyboard { height: 66px; position: relative; display: flex; overflow: hidden; border-radius: 8px; border: 1px solid #d3d2c7; background: #f4f0e7; }
+  .key-white { flex: 1; height: 100%; border-right: 1px solid #c9c7bb; transition: background .1s; }
+  .key-white:last-child { border-right: none; }
+  .key-black { position: absolute; top: 0; z-index: 1; height: 61%; width: 4.2%; transform: translateX(-50%); border-radius: 0 0 3px 3px; background: #173f3c; transition: background .1s; }
+  #submit:hover:not(:disabled) .key-white { background: #d8e3da; }
+  #submit:hover:not(:disabled) .key-black { background: #456963; }
+  #submit:disabled .key-white { background: #d7d2c7; }
+  #submit:disabled .key-black { background: #797c72; }
+  .submit-caption { margin-top: 12px; padding-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: #31564d; }
+  .submit-caption svg.spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .note-row { margin-top: 20px; display: flex; align-items: flex-start; gap: 8px; font-size: 11px; line-height: 1.6; color: #8a9288; }
+  .note-row .tag { font-family: 'DM Mono', monospace; font-size: 10px; color: #a7785e; margin-top: 2px; flex-shrink: 0; }
+
+  .status-line { margin-top: 16px; font-size: 12px; color: #8a9288; min-height: 1em; }
+  .status-line.err { color: #aa5d49; }
+
+  .state { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 20px; }
+  .state.active { display: flex; }
+  .state-ring { position: relative; display: grid; place-items: center; height: 122px; width: 122px; border-radius: 999px; border: 1px solid #cbd0c2; margin-bottom: 20px; }
+  .state-ring .dashed { position: absolute; inset: 11px; border-radius: 999px; border: 1px dashed #bec8b9; }
+  .state-ring.spin-ring .dashed { animation: spin 22s linear infinite; }
+  .bars-deco { display: flex; align-items: center; gap: 5px; height: 68px; }
+  .bars-deco span { width: 3px; border-radius: 999px; background: #729084; }
+  .state-badge { position: absolute; right: -4px; top: 16px; display: grid; place-items: center; height: 28px; width: 28px; border-radius: 999px; background: #d78666; color: #f8f4e9; }
+  p.state-title { font-size: 21px; font-style: italic; color: #567067; margin: 0; }
+  p.state-title.big { font-size: 25px; }
+  p.state-desc { margin: 8px 0 0; max-width: 280px; font-size: 12px; line-height: 1.6; color: #829087; }
+  .busy-indicator { margin-top: 24px; display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: #89948a; }
+  .busy-indicator .dot { height: 6px; width: 6px; border-radius: 999px; background: #d78666; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  .alert-icon { display: grid; place-items: center; height: 48px; width: 48px; border-radius: 999px; background: #f2ddd2; color: #aa5d49; margin-bottom: 16px; }
+  .retry-btn { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: 1px solid #c9b2a5; padding: 8px 16px; font-size: 11px; font-weight: 600; color: #815b4d; background: transparent; cursor: pointer; font-family: inherit; }
+  .retry-btn:hover { background: #f2e5dc; }
+
+  #resultState { width: 100%; }
+  .result-head { text-align: center; margin-bottom: 20px; }
+  .result-piece { font-size: 12px; color: #76867c; margin: 0; }
+  .result-piece .sep { margin: 0 4px; color: #b8a998; }
+  .result-score { margin-top: 8px; display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+  .result-score .num { font-size: 69px; line-height: 1; letter-spacing: -.06em; color: #183d39; }
+  .result-score .denom { font-family: 'DM Mono', monospace; font-size: 13px; color: #819087; }
+  .result-label { margin: 4px 0 0; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: #9a8270; }
+  .bars { margin-bottom: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+  .bar-label { width: 88px; flex-shrink: 0; color: #66796f; }
+  .bar-track { flex: 1; height: 6px; border-radius: 999px; background: #d5d9ce; overflow: hidden; }
+  .bar-fill { display: block; height: 100%; border-radius: 999px; background: #5e8577; transform-origin: left; animation: fillbar .7s .15s ease-out both; }
+  @keyframes fillbar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .bar-val { width: 32px; text-align: right; font-family: 'DM Mono', monospace; font-size: 11px; color: #3c5c51; font-variant-numeric: tabular-nums; }
   .feedback-toggle {
-    margin-top: 4px; width: 100%; padding: 12px; font-size: 1rem; font-weight: 600;
-    border: 1px solid #333; border-radius: 8px; background: transparent; color: #fff; cursor: pointer;
+    display: flex; width: 100%; align-items: center; justify-content: space-between; border-radius: 8px;
+    border: 1px solid #cbd0c3; background: #f0f0e7; padding: 12px 16px; text-align: left; font-size: 12px;
+    font-weight: 600; color: #38594f; cursor: pointer; font-family: inherit; transition: background .15s;
   }
-  .feedback-toggle:hover { background: #151515; }
-  .feedback { margin: 16px 0 0; padding-left: 22px; color: #ddd; display: none; }
-  .feedback.open { display: block; }
-  .feedback li { margin-bottom: 8px; font-size: 0.95rem; line-height: 1.5; }
-  strong { color: #fff; }
-  .about {
-    max-width: 780px; width: 100%; margin: 88px auto 0;
-    border-top: 1px solid #222; padding-top: 48px;
+  .feedback-toggle:hover { background: #e6e9df; }
+  .feedback-toggle svg { transition: transform .15s; }
+  .feedback-toggle.open svg { transform: rotate(180deg); }
+  ul.feedback-list { display: none; margin: 12px 0 0; padding-left: 20px; font-size: 12px; line-height: 1.65; color: #62756a; }
+  ul.feedback-list.open { display: block; }
+  ul.feedback-list li { margin-bottom: 10px; }
+  ul.feedback-list li::marker { color: #d18160; }
+  .reset-link { margin-top: 20px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: #60776c; background: none; border: none; cursor: pointer; font-family: inherit; }
+  .reset-link:hover { color: #183d39; }
+
+  .mismatch-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: #b56d54; margin: 0; }
+  h3.mismatch-title { margin: 8px 0 0; font-size: 30px; line-height: 1.15; letter-spacing: -.025em; }
+  p.mismatch-desc { margin: 16px 0 0; max-width: 360px; font-size: 13px; line-height: 1.8; color: #6d7c71; }
+  p.mismatch-desc strong { font-weight: 600; color: #35594f; }
+  .use-suggested-btn {
+    margin-top: 24px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; border: none;
+    background: #1c4942; color: #f5f1e7; padding: 12px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .1em; cursor: pointer; font-family: inherit; transition: background .15s;
   }
-  .about h2 { font-size: 1.15rem; font-weight: 700; margin: 0 0 20px; color: #fff; }
-  .about p { color: #aaa; font-size: 0.95rem; line-height: 1.7; margin: 0 0 18px; }
-  .about .tagline { color: #fff; font-weight: 600; font-size: 0.95rem; margin: 24px 0 0; }
+  .use-suggested-btn:hover { background: #286057; }
+  .keep-btn { margin-top: 12px; background: none; border: none; padding: 8px 16px; font-size: 11px; font-weight: 600; color: #667970; text-decoration: underline; text-decoration-color: #aab7aa; text-underline-offset: 4px; cursor: pointer; font-family: inherit; }
+  .keep-btn:hover { color: #173c38; }
+
+  .cards-footnote {
+    max-width: 1060px; margin: 36px auto 0; display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+    justify-content: space-between; border-top: 1px solid #d5d3c8; padding-top: 20px; font-size: 11px; color: #879087;
+  }
+  @media (min-width: 640px) { .cards-footnote { flex-direction: row; align-items: center; } }
+  .cards-footnote .left { display: flex; align-items: center; gap: 8px; }
+  .cards-footnote .right { font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .14em; }
+
+  section.about { position: relative; border-top: 1px solid #d7d4c8; background: #e9e7dc; }
+  .about-inner { max-width: 1060px; margin: 0 auto; display: grid; gap: 40px; padding: 64px 24px; }
+  @media (min-width: 768px) { .about-inner { grid-template-columns: .65fr 1.35fr; gap: 80px; padding: 80px 40px; } }
+  .about-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .2em; color: #a06d57; margin: 0; }
+  .about-heading { margin: 16px 0 0; max-width: 280px; font-size: 38px; line-height: 1.05; letter-spacing: -.03em; }
+  .about-deco { margin-top: 28px; display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: #819087; }
+  .about-deco .line { height: 1px; width: 32px; background: #c97756; }
+  .about-body { display: flex; flex-direction: column; gap: 20px; font-size: 13px; line-height: 1.9; color: #69786f; }
+  .about-body p { margin: 0; }
+  .about-body .pull { padding-top: 8px; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 21px; color: #31594e; }
+
+  footer.site-footer {
+    position: relative; max-width: 1192px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 24px; font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: #8c9589;
+  }
+  @media (min-width: 640px) { footer.site-footer { padding: 24px 40px; } }
+  footer.site-footer .right { font-family: 'DM Mono', monospace; }
 </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Intentio.</h1>
-    <div class="sub">Hear the intention behind the score. Compare your performance to a VirtuosoNet-predicted composer-style interpretation and discover how your timing, dynamics, articulation, and phrasing align with the musical character of the piece.</div>
-  </div>
+  <div class="grain"></div>
+  <div class="blob"></div>
 
-  <div class="layout">
-    <div class="panel left">
-      <form id="form">
-        <label for="piece">Piece</label>
-        <select id="piece" required></select>
+  <header class="site">
+    <a href="/" class="brand" aria-label="Intentio home">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </span>
+      <span class="brand-name serif">intentio<span class="dot">.</span></span>
+    </a>
+    <div class="status-pill">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Listening</span>
+    </div>
+  </header>
 
-        <label for="file">Your recording (audio or video)</label>
-        <input id="file" type="file" accept="audio/*,video/*" required>
+  <section class="hero-wrap">
+    <div class="hero rise">
+      <div class="eyebrow"><span class="line"></span> a listening practice <span class="line"></span></div>
+      <h1 class="hero-title serif">Hear the intention<br><em>behind the score.</em></h1>
+      <p class="hero-sub">Compare your performance with a VirtuosoNet-predicted composer-style interpretation. Discover how your timing, dynamics, articulation, and phrasing meet the musical character of the piece.</p>
+    </div>
 
-        <button id="submit" type="submit" aria-label="Analyze">
-          <div class="piano-keys">
-            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
-            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
-            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
-            <div class="white-key"></div><div class="white-key"></div><div class="white-key"></div>
-            <div class="white-key"></div><div class="white-key"></div>
-            <div class="black-key" style="left:7.142857%"></div>
-            <div class="black-key" style="left:14.285714%"></div>
-            <div class="black-key" style="left:28.571429%"></div>
-            <div class="black-key" style="left:35.714286%"></div>
-            <div class="black-key" style="left:42.857143%"></div>
-            <div class="black-key" style="left:57.142857%"></div>
-            <div class="black-key" style="left:64.285714%"></div>
-            <div class="black-key" style="left:78.571429%"></div>
-            <div class="black-key" style="left:85.714286%"></div>
-            <div class="black-key" style="left:92.857143%"></div>
+    <div class="grid-cards">
+      <section class="card card-left rise-delay" aria-label="Upload a performance">
+        <div class="card-head">
+          <div>
+            <p class="card-eyebrow">01 / your performance</p>
+            <h2 class="card-title serif">Begin with a piece</h2>
           </div>
-        </button>
-      </form>
-      <div id="status" class="status"></div>
+          <span class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v4"/><path d="M6 6v12"/><path d="M10 3v18"/><path d="M14 8v8"/><path d="M18 5v14"/><path d="M22 10v4"/></svg></span>
+        </div>
+
+        <form id="form">
+          <label class="field-label" for="piece">Choose a score</label>
+          <div class="select-wrap">
+            <select id="piece" required></select>
+            <svg class="arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+          </div>
+
+          <label class="field-label" for="file" style="margin-top:28px">Your recording <span class="hint">· audio or video</span></label>
+          <input id="file" type="file" accept="audio/*,video/*" required style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">
+          <button type="button" class="dropzone" id="dzBtn">
+            <span class="dz-icon" id="dzIcon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8"/><path d="m8 17 4-4 4 4"/><path d="M20.4 18.9A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/></svg></span>
+            <span class="dz-text">
+              <span class="dz-name" id="dzName">Choose a recording to upload</span>
+              <span class="dz-sub" id="dzSub">MP3, WAV, M4A, MP4 and more</span>
+            </span>
+            <span class="dz-action" id="dzAction">Browse</span>
+          </button>
+
+          <button id="submit" type="submit" aria-label="Analyze performance">
+            <div class="piano-keyboard">
+              <div class="key-white"></div><div class="key-white"></div><div class="key-white"></div>
+              <div class="key-white"></div><div class="key-white"></div><div class="key-white"></div>
+              <div class="key-white"></div><div class="key-white"></div><div class="key-white"></div>
+              <div class="key-white"></div><div class="key-white"></div><div class="key-white"></div>
+              <div class="key-white"></div><div class="key-white"></div>
+              <div class="key-black" style="left:7.142857%"></div>
+              <div class="key-black" style="left:14.285714%"></div>
+              <div class="key-black" style="left:28.571429%"></div>
+              <div class="key-black" style="left:35.714286%"></div>
+              <div class="key-black" style="left:42.857143%"></div>
+              <div class="key-black" style="left:57.142857%"></div>
+              <div class="key-black" style="left:64.285714%"></div>
+              <div class="key-black" style="left:78.571429%"></div>
+              <div class="key-black" style="left:85.714286%"></div>
+              <div class="key-black" style="left:92.857143%"></div>
+            </div>
+            <div class="submit-caption" id="submitCaption">
+              Analyze performance
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </button>
+        </form>
+        <div class="note-row"><span class="tag">NOTE</span><p>For the clearest reading, use a recording with the piano in the foreground.</p></div>
+        <div class="status-line" id="status"></div>
+      </section>
+
+      <section class="card card-right" aria-label="Analysis results">
+        <div class="card-head">
+          <div>
+            <p class="card-eyebrow">02 / the interpretation</p>
+            <h2 class="card-title serif">A closer listening</h2>
+          </div>
+          <span class="card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        </div>
+
+        <div class="state active" id="emptyState">
+          <div class="state-ring">
+            <div class="dashed"></div>
+            <div class="bars-deco">
+              <span style="height:20px"></span><span style="height:43px"></span><span style="height:29px"></span>
+              <span style="height:58px"></span><span style="height:37px"></span><span style="height:50px"></span>
+              <span style="height:24px"></span><span style="height:44px"></span><span style="height:16px"></span>
+            </div>
+            <span class="state-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+          </div>
+          <p class="state-title serif">Your performance, considered.</p>
+          <p class="state-desc">Results will appear here after you analyze a recording.</p>
+        </div>
+
+        <div class="state" id="processingState">
+          <div class="state-ring spin-ring" style="height:116px;width:116px;border-color:#c5cbbd">
+            <div class="dashed" style="border-color:#b4c4b7"></div>
+            <svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="#527a6e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v4"/><path d="M6 6v12"/><path d="M10 3v18"/><path d="M14 8v8"/><path d="M18 5v14"/><path d="M22 10v4"/></svg>
+          </div>
+          <p class="state-title big serif" id="processingTitle">Listening between the notes&hellip;</p>
+          <p class="state-desc" id="processingDesc">Comparing your interpretation with the score. This can take a minute or two.</p>
+          <div class="busy-indicator"><span class="dot"></span> Analysis in progress</div>
+        </div>
+
+        <div class="state" id="errorState">
+          <span class="alert-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+          <p class="state-title big serif">We couldn't complete that.</p>
+          <p class="state-desc" id="errorDesc" style="max-width:320px;color:#8e6558"></p>
+          <button type="button" class="retry-btn" id="retryBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Try another recording</button>
+        </div>
+
+        <div class="state" id="mismatchState">
+          <span class="alert-icon" style="background:#f1dfd3;color:#b3614b"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+          <p class="mismatch-eyebrow mono">A different score, perhaps?</p>
+          <h3 class="mismatch-title serif">Doesn&rsquo;t look like a match.</h3>
+          <p class="mismatch-desc" id="mismatchDesc"></p>
+          <button type="button" class="use-suggested-btn" id="useSuggestedBtn">Use suggested score
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="keep-btn" id="keepBtn">Keep my selection</button>
+        </div>
+
+        <div class="state" id="resultState" style="display:none">
+          <div id="resultBody"></div>
+        </div>
+      </section>
     </div>
 
-    <div class="panel right" id="resultPanel">
-      <div class="placeholder" id="placeholder">Results will appear here after you analyze a recording.</div>
-      <div id="result"></div>
+    <div class="cards-footnote">
+      <span class="left"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6f927f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> A reference point, never a verdict.</span>
+      <span class="right mono">Listen &middot; compare &middot; interpret</span>
     </div>
-  </div>
+  </section>
 
-  <div class="about">
-    <h2>Preserving the intention behind the music</h2>
-    <p>Classical music is more than playing the notes written on a page. Every score carries the musical language of a composer—their approach to phrasing, dynamics, tempo, articulation, and expression—shaped by the historical and artistic world in which they composed.</p>
-    <p>Yet a score cannot capture everything about how music should sound. Much of classical interpretation lives between the notes, passed down through performance traditions, recordings, scholarship, and teaching.</p>
-    <p>We explore how AI can help preserve and make this interpretive knowledge more accessible. Rather than defining one &ldquo;correct&rdquo; performance, we give musicians a reference point for understanding the composer's stylistic world, seeing where their own interpretation differs, and making those artistic choices more intentionally.</p>
-    <p class="tagline">Preserve the tradition. Understand the intention. Find your interpretation.</p>
-  </div>
+  <section class="about">
+    <div class="about-inner">
+      <div>
+        <p class="about-eyebrow">The thought behind it</p>
+        <h2 class="about-heading serif">Preserving the intention behind the music</h2>
+        <div class="about-deco"><span class="line"></span> listen with purpose</div>
+      </div>
+      <div class="about-body">
+        <p>Classical music is more than playing the notes written on a page. Every score carries the musical language of a composer&mdash;their approach to phrasing, dynamics, tempo, articulation, and expression&mdash;shaped by the historical and artistic world in which they composed.</p>
+        <p>Yet a score cannot capture everything about how music should sound. Much of classical interpretation lives between the notes, passed down through performance traditions, recordings, scholarship, and teaching.</p>
+        <p>We explore how AI can help preserve and make this interpretive knowledge more accessible. Rather than defining one &ldquo;correct&rdquo; performance, we give musicians a reference point for understanding the composer&rsquo;s stylistic world, seeing where their own interpretation differs, and making those artistic choices more intentionally.</p>
+        <p class="pull">Preserve the tradition. Understand the intention. Find your interpretation.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <span>Intentio &middot; performance, thoughtfully heard</span>
+    <span class="right">01 &mdash; &infin;</span>
+  </footer>
 
 <script>
 const piecesSelect = document.getElementById('piece');
 const form = document.getElementById('form');
 const submitBtn = document.getElementById('submit');
+const submitCaption = document.getElementById('submitCaption');
 const statusEl = document.getElementById('status');
-const resultEl = document.getElementById('result');
-const placeholderEl = document.getElementById('placeholder');
+const fileInput = document.getElementById('file');
+const dzBtn = document.getElementById('dzBtn');
+const dzIcon = document.getElementById('dzIcon');
+const dzName = document.getElementById('dzName');
+const dzSub = document.getElementById('dzSub');
+const dzAction = document.getElementById('dzAction');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+const states = ['emptyState', 'processingState', 'errorState', 'mismatchState', 'resultState'];
+function showState(name) {
+  states.forEach(id => {
+    const el = document.getElementById(id);
+    if (id === name) { el.style.display = 'flex'; el.classList.add('active'); }
+    else { el.style.display = 'none'; el.classList.remove('active'); }
+  });
+}
+
+const uploadIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8"/><path d="m8 17 4-4 4 4"/><path d="M20.4 18.9A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/></svg>';
+const fileIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+
+dzBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  const f = fileInput.files[0];
+  if (f) {
+    dzIcon.innerHTML = fileIcon;
+    dzName.textContent = f.name;
+    dzSub.textContent = (f.size / (1024 * 1024)).toFixed(1) + ' MB · ready to analyze';
+    dzAction.textContent = 'Change';
+  } else {
+    dzIcon.innerHTML = uploadIcon;
+    dzName.textContent = 'Choose a recording to upload';
+    dzSub.textContent = 'MP3, WAV, M4A, MP4 and more';
+    dzAction.textContent = 'Browse';
+  }
+});
 
 async function loadPieces() {
-  const res = await fetch('/api/pieces');
-  const pieces = await res.json();
-  piecesSelect.innerHTML = pieces.map(p => `<option value="${p.id}">${p.composer} — ${p.title}</option>`).join('');
+  try {
+    const res = await fetch('/api/pieces');
+    const pieces = await res.json();
+    piecesSelect.innerHTML = pieces.map(p => `<option value="${p.id}">${p.composer} — ${p.title}</option>`).join('');
+    statusDot.classList.add('ready');
+    statusText.textContent = 'Studio ready';
+  } catch (e) {
+    statusText.textContent = 'Listening';
+  }
 }
 loadPieces();
 
+function setBusy(busy, label) {
+  submitBtn.disabled = busy;
+  fileInput.disabled = busy;
+  piecesSelect.disabled = busy;
+  dzBtn.disabled = busy;
+  if (busy) {
+    submitCaption.innerHTML = `<svg class="spin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${label}`;
+  } else {
+    submitCaption.innerHTML = `Analyze performance <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+  }
+}
+
 function bar(label, value) {
-  const v = value === null || value === undefined ? 0 : Math.round(value);
+  const v = value === null || value === undefined ? 0 : Math.max(0, Math.min(100, Math.round(value)));
   return `<div class="bar-row">
     <div class="bar-label">${label}</div>
-    <div class="bar-track"><div class="bar-fill" style="width:${v}%"></div></div>
+    <div class="bar-track"><span class="bar-fill" style="width:${v}%"></span></div>
     <div class="bar-val">${v}</div>
   </div>`;
 }
 
+let lastMismatch = null;
+
 function renderResult(r) {
-  placeholderEl.style.display = 'none';
-  resultEl.innerHTML = `
-    <div class="card-title">${r.composer} — ${r.piece}</div>
-    <div class="overall">${Math.round(r.overall_score)}%</div>
+  document.getElementById('resultBody').innerHTML = `
+    <div class="result-head">
+      <p class="result-piece">${r.composer}<span class="sep">/</span>${r.piece}</p>
+      <div class="result-score"><span class="num serif">${Math.round(r.overall_score)}</span><span class="denom">/ 100</span></div>
+      <p class="result-label">stylistic alignment</p>
+    </div>
     <div class="bars">
       ${bar('Tempo', r.tempo_score)}
       ${bar('Dynamics', r.dynamics_score)}
       ${bar('Articulation', r.articulation_score)}
     </div>
-    <button type="button" class="feedback-toggle" id="feedbackToggle">Feedback</button>
-    <ul class="feedback" id="feedbackList">${r.feedback.map(f => `<li>${f}</li>`).join('') || '<li>No major deviations found.</li>'}</ul>`;
+    <button type="button" class="feedback-toggle" id="feedbackToggle">
+      <span>Composer-style feedback</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </button>
+    <ul class="feedback-list" id="feedbackList">${(r.feedback && r.feedback.length ? r.feedback : ['No major deviations found.']).map(f => `<li>${f}</li>`).join('')}</ul>
+    <button type="button" class="reset-link" id="resultResetBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Analyze another performance
+    </button>`;
 
   const toggle = document.getElementById('feedbackToggle');
   const list = document.getElementById('feedbackList');
   toggle.addEventListener('click', () => {
     const open = list.classList.toggle('open');
-    toggle.textContent = open ? 'Hide feedback' : 'Feedback';
+    toggle.classList.toggle('open', open);
   });
+  document.getElementById('resultResetBtn').addEventListener('click', resetToIdle);
+  showState('resultState');
 }
 
 function renderMismatch(m) {
-  placeholderEl.style.display = 'none';
-  resultEl.innerHTML = `
-    <div class="card-title" style="color:#ff6b5e">Doesn't look like a match</div>
-    <p style="font-size:0.9rem;color:#ccc;line-height:1.6;text-align:center;margin-top:12px">
-      Your recording matches <strong>${m.suggested_piece}</strong> much more closely
-      than the piece you selected (<strong>${m.selected_piece}</strong>).
-      Did you mean to pick that instead?
-    </p>`;
+  lastMismatch = m;
+  document.getElementById('mismatchDesc').innerHTML =
+    `Your recording matches <strong>${m.suggested_piece}</strong> much more closely than the piece you selected, <strong>${m.selected_piece}</strong>. Did you mean to pick that instead?`;
+  showState('mismatchState');
 }
+
+function resetToIdle() {
+  statusEl.textContent = '';
+  statusEl.classList.remove('err');
+  showState('emptyState');
+  setBusy(false, '');
+}
+
+document.getElementById('retryBtn').addEventListener('click', resetToIdle);
+document.getElementById('keepBtn').addEventListener('click', resetToIdle);
+document.getElementById('useSuggestedBtn').addEventListener('click', () => {
+  if (lastMismatch && lastMismatch.suggested_piece_id) {
+    piecesSelect.value = lastMismatch.suggested_piece_id;
+  }
+  resetToIdle();
+});
 
 async function poll(jobId) {
   const res = await fetch(`/api/jobs/${jobId}`);
   const job = await res.json();
   if (job.status === 'processing') {
-    statusEl.textContent = 'Analyzing... this can take a minute or two.';
+    document.getElementById('processingTitle').textContent = 'Listening between the notes…';
+    document.getElementById('processingDesc').textContent = 'Comparing your interpretation with the score. This can take a minute or two.';
+    showState('processingState');
     setTimeout(() => poll(jobId), 3000);
   } else if (job.status === 'done') {
-    statusEl.textContent = '';
     renderResult(job.result);
-    submitBtn.disabled = false;
+    setBusy(false, '');
   } else if (job.status === 'mismatch') {
-    statusEl.textContent = '';
     renderMismatch(job.mismatch);
-    submitBtn.disabled = false;
+    setBusy(false, '');
   } else {
-    statusEl.innerHTML = `<span class="error">Error: ${job.error}</span>`;
-    submitBtn.disabled = false;
+    document.getElementById('errorDesc').textContent = job.error || 'The analysis could not be completed. Please try again.';
+    showState('errorState');
+    setBusy(false, '');
   }
 }
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  submitBtn.disabled = true;
-  placeholderEl.style.display = 'block';
-  resultEl.innerHTML = '';
-  statusEl.textContent = 'Uploading...';
+  if (!fileInput.files[0] || !piecesSelect.value) return;
+  setBusy(true, 'Sending your recording');
+  document.getElementById('processingTitle').textContent = 'Sending the recording…';
+  document.getElementById('processingDesc').textContent = 'Preparing your performance for analysis.';
+  showState('processingState');
 
   const fd = new FormData();
   fd.append('piece_id', piecesSelect.value);
-  fd.append('file', document.getElementById('file').files[0]);
+  fd.append('file', fileInput.files[0]);
 
-  const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+  let res;
+  try {
+    res = await fetch('/api/analyze', { method: 'POST', body: fd });
+  } catch (err) {
+    document.getElementById('errorDesc').textContent = 'The recording could not be uploaded. Please try again.';
+    showState('errorState');
+    setBusy(false, '');
+    return;
+  }
   if (!res.ok) {
-    statusEl.innerHTML = `<span class="error">Upload failed: ${await res.text()}</span>`;
-    submitBtn.disabled = false;
+    document.getElementById('errorDesc').textContent = await res.text();
+    showState('errorState');
+    setBusy(false, '');
     return;
   }
   const { job_id } = await res.json();
-  statusEl.textContent = 'Analyzing... this can take a minute or two.';
+  setBusy(true, 'Listening closely');
   poll(job_id);
 });
 </script>
