@@ -8,3 +8,13 @@ soundfile
 torch
 pretty_midi
 pandas
+mido
+scikit-learn
+matplotlib
+omegaconf
+pyyaml
+six
+tqdm
+huggingface_hub
+wandb
+plotly
