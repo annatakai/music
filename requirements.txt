@@ -6,3 +6,4 @@ scipy
 librosa
 soundfile
 torch
+pretty_midi
