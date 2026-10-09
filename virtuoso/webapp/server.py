@@ -9,6 +9,9 @@ import threading
 import uuid
 from pathlib import Path
 
+import torch
+torch.set_num_threads(1)
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 

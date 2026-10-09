@@ -1,6 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import numpy as np
 import csv
 from pathlib import Path
@@ -84,6 +81,9 @@ def cal_tempo_and_velocity_by_beat(features, note_locations, momentum=0.8):
 
 
 def plot_performance_worm(features, note_locations, save_name='images/performance_worm.png', save_csv=False, attention_weights=None):
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
     tempos, velocities = cal_tempo_and_velocity_by_beat(features, note_locations)
     if save_csv:
         if isinstance(save_name, str):
@@ -113,6 +113,7 @@ def plot_performance_worm(features, note_locations, save_name='images/performanc
 
 
 def plot_normalized_feature(features_list, save_name='feature_test.png'):
+    import matplotlib.pyplot as plt
     plt.figure(figsize=(12, 7))
     num_beat = len(features_list[0])
 
@@ -128,6 +129,7 @@ def plot_normalized_feature(features_list, save_name='feature_test.png'):
 
 
 def plot_human_model_features_compare(features_list, save_name='feature_test.png'):
+    import matplotlib.pyplot as plt
     plt.figure(figsize=(12, 7))
     num_beat = len(features_list[0])
     num_performance = len(features_list)
@@ -149,6 +151,8 @@ def plot_human_model_features_compare(features_list, save_name='feature_test.png
 
 
 def plot_model_features_compare(features_list, num_models=4, save_name='feature_test.png'):
+    import matplotlib
+    import matplotlib.pyplot as plt
     plt.figure(figsize=(12, 6))
     matplotlib.rcParams.update({'font.size': 20})
 

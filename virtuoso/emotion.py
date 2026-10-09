@@ -1,10 +1,6 @@
 import torch as th
 from .utils import batch_to_device
-from . import style_analysis as sty
-import wandb
 import numpy as np
-import pandas as pd
-import plotly.express as px
 
 def get_style_from_emotion_data(model, emotion_loader, device):
   total_perform_z = []
@@ -27,6 +23,10 @@ def get_style_from_emotion_data(model, emotion_loader, device):
 
 
 def validate_style_with_emotion_data(model, emotion_loader, device, out_dir, iteration, send_wandb_log=True):
+    from . import style_analysis as sty
+    import wandb
+    import pandas as pd
+    import plotly.express as px
     total_perform_z = get_style_from_emotion_data(model, emotion_loader, device)
     abs_confusion, abs_accuracy, norm_confusion, norm_accuracy = sty.get_classification_error_with_svm(total_perform_z, emotion_loader.dataset.cross_valid_split)
     # for dim_reduc_type in ("pca", "umap"):

@@ -24,7 +24,6 @@ from .pyScoreParser.utils import get_item_by_xml_position
 from pathlib import Path
 from .utils import load_weight, read_model_setting, get_input_size_from_training_data
 from . import graph
-from . import style_analysis as sty
 from .emotion import get_style_from_emotion_data
 from .dataset import EmotionDataset, FeatureCollate, split_graph_to_batch
 from torch.utils.data import DataLoader
@@ -52,6 +51,7 @@ def inference(args, model, device):
 
 
 def inference_with_emotion(args, model, device):
+    from . import style_analysis as sty
     model = load_weight(model, args.checkpoint)
     model.eval()
     # encode_emotion

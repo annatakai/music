@@ -513,14 +513,42 @@ document.getElementById('useSuggestedBtn').addEventListener('click', () => {
   resetToIdle();
 });
 
-async function poll(jobId) {
-  const res = await fetch(`/api/jobs/${jobId}`);
-  const job = await res.json();
+const MAX_CONSECUTIVE_FAILURES = 8;
+const MAX_TOTAL_WAIT_MS = 5 * 60 * 1000;
+
+async function poll(jobId, startedAt = Date.now(), failures = 0) {
+  let job;
+  try {
+    const res = await fetch(`/api/jobs/${jobId}`);
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    job = await res.json();
+  } catch (err) {
+    failures += 1;
+    if (failures >= MAX_CONSECUTIVE_FAILURES) {
+      document.getElementById('errorDesc').textContent = 'Lost connection to the server while analyzing. It may be restarting under load — please try again in a minute.';
+      showState('errorState');
+      setBusy(false, '');
+      return;
+    }
+    document.getElementById('processingTitle').textContent = 'Reconnecting…';
+    document.getElementById('processingDesc').textContent = 'The connection dropped momentarily. Still trying to reach the server.';
+    showState('processingState');
+    setTimeout(() => poll(jobId, startedAt, failures), 4000);
+    return;
+  }
+
+  if (Date.now() - startedAt > MAX_TOTAL_WAIT_MS) {
+    document.getElementById('errorDesc').textContent = 'This is taking much longer than expected, likely due to server load. Please try again later.';
+    showState('errorState');
+    setBusy(false, '');
+    return;
+  }
+
   if (job.status === 'processing') {
     document.getElementById('processingTitle').textContent = 'Listening between the notes…';
     document.getElementById('processingDesc').textContent = 'Comparing your interpretation with the score. This can take a minute or two.';
     showState('processingState');
-    setTimeout(() => poll(jobId), 3000);
+    setTimeout(() => poll(jobId, startedAt, 0), 3000);
   } else if (job.status === 'done') {
     renderResult(job.result);
     setBusy(false, '');
